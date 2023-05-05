@@ -1,245 +1,251 @@
 #include <kipr/wombat.h>
 
 
-void claw (int fromPosC, int toPosC);
+int arm(int fromPosA, int toPosA); //longer arm 
 
-void armRaise (int fromPosArm0, int fromPosArm1, int finalPos);
+void clawOpen();
 
-void armDrop (int fromPosArm0, int fromPosArm1, int finalPos);
+void clawClosed();
 
-void drive(int distance);
+int base(int fromPosB, int toPosB); //Base rotation
 
-void turnR (int degree);
+void drive(int dist);
 
-void turnL (int degree);
+void back (int dist);
+
+void turnR (int deg);
+
+void turnL (int deg);
 
 void camera();
 
 
-const int SPEEDR = 200; //Max is 500mm/second 
+const int SPEEDR = 190; //Max is 500mm/second 
 
-const int SPEEDL = 180;
+const int SPEEDL = 190;
 
-const int SPEEDA = 1; //Arm speed
+const int SPEEDA = 2; //Arm speed
 
-//Distance travels in mm
+const int CLAWO = 1110;
 
-//Arm0 is horizontal at 1024 
-
-//Arm1 is horizontal at 0
-
-//Length of table is 2450mm
-
-//width of table is 1130mm
+const int CLAWC = 440;
 
 
 int main()
 
 {
 
-//Opening Code
+	//Opening Code
 
-create_connect();
+	create_connect();
 
- //wait_for_light(0);
+	//wait_for_light(0);
 
-shut_down_in(119);
+	shut_down_in(119);
 
-enable_servos();
+	enable_servos();
 
-camera_open();
+	camera_open();
 
-//Variable to count how far the bot has traveled
+    
 
-int count = 0;
+	//Initialize servo positions    
 
+    int basePos = 1024, armPos = 1024;
 
-//Sets servos to initial flat position
+	set_servo_position(1, basePos); //base
 
-set_servo_position(0, 1024); //Flat Horizontal
+	set_servo_position(2, armPos); //longer arm
 
-set_servo_position(1, 0); //Flat Horizontal
+	set_servo_position(3, CLAWO); //claw
 
-set_servo_position(2, 1024); //Open Claw
+    
 
+    //Code:
 
-//Testing Arm function
+    //Moving Towards BotGal
 
-armRaise(1024, 0, 1600);
+	//Starts at Watch Floor moves forward toward towers and turns toward tower with BotGal
 
-armDrop(0, 1024, 0);
+	turnR(47);
 
+	drive(1050);
 
-//Moving Towards BotGal
+	turnR(43);
 
-//Starts at Watch Floor moves forward toward towers and turns toward tower with BotGal
+	drive(100);
 
-turnR(47);
+    create_stop();
 
-while((get_create_lbump() == 0) || (get_create_rbump() == 0))
+    
 
-	drive(1000);
+    //Picking Up Botgal
 
-turnL(43);
+    armPos = arm(armPos, 2047); //Lifts arm up
 
-drive(-15);
+    basePos = base(basePos, 0); //turns crane towards tower
 
+    armPos = arm(armPos, 1750); //Lowers arm onto botgal
 
-//Picking up BotGal
+    clawClosed();    
 
-armRaise(1024, 0, 1600); //Extends Arm upward
+    armPos = arm(armPos, 2047); //Raises arm to avoid hitting tower
 
-claw(1024, 0); //Closes Claw
+    basePos = base(basePos, 2047); //resets crane position
 
-set_servo_position(1, 1800); //Lifts arm by a bit in order to move BotGal without knocking over towers
+    armPos = arm(armPos, 1024); //Lowers arm for safer transport
 
+   
 
-//Put BotGal in analysis lab
+    //Move towards analysis lab
 
-//Starts in front of tower and turns left moves forward and turns left again and drives towards analysis lab
+    turnR(90);
 
-turnL(90);
+    drive(500);
 
-drive(400);
+    create_stop();
 
-turnL(90);
+    clawOpen();
 
-drive(600);
+    msleep(10);
 
-//Drops arm and opens claw
+    basePos = base(basePos, 1024); //Resets crane position
 
-armDrop(0, 1600, 0);
+    
 
-claw(0, 1024);
+    //Drive towards tower one 
 
+    drive(-500);
 
-//Grab First Cube
+    turnR(90);
 
-//Starts in front of analysis lab and drives towards farthest to the left cube
+    drive(200);
 
-turnR(180);
+    create_stop();
 
-drive(600);
+    
 
-turnL(90);
+    armPos = arm(armPos, 2047); //Lifts arm up
 
-drive(700);
+    basePos = base(basePos, 2047); //turns crane towards tower
 
-turnR(90);
+    armPos = arm(armPos, 1500); //Lowers arm onto botgal
 
-//Picking up BotGal
+    clawClosed();    
 
-armRaise(1024, 0, 1600); //Extends Arm upward
+    armPos = arm(armPos, 2047); //Raises arm to avoid hitting tower
 
-claw(1024, 0); //Closes Claw
+    basePos = base(basePos, 1024); //resets crane position
 
-set_servo_position(1, 1800); //Lifts arm by a bit in order to move BotGal without knocking over towers
+    armPos = arm(armPos, 1024); //Lowers arm for safer transport
 
+    
 
-//move towards analysis lab
+    //Moving towards tower two
 
-//Starts in front of farthest left tower and moves towards analysis lab
+    //Goal is to stack block one on block two and transport both 
 
-turnR(90);
+    drive(200);
 
-drive(700);
+    create_stop();
 
-turnR(90);
+    
 
-drive(600);
+    //Picking Up Botgal
 
-//Drops arm and opens claw
+    armPos = arm(armPos, 2047); //Lifts arm up
 
-armDrop(0, 1600, 0);
+    basePos = base(basePos, 2047); //turns crane towards tower
 
-claw(0, 1024);
+    armPos = arm(armPos, 1700); //Lowers arm onto botgal
 
+    clawOpen();
 
-//Get Cube 2
+    armPos = arm(armPos, 1500); //Lowers arm onto botgal
 
-//Moves back from analysis lab to tower and back to analysis lab putting cube on top of other cube
+    clawClosed();    
 
-turnR(180);
+    armPos = arm(armPos, 1700); //Raises arm to avoid hitting tower
 
-drive(600);
+    basePos = base(basePos, 1024); //resets crane position
 
-//Picking up BotGal
+    
 
-armRaise(1024, 0, 1600); //Extends Arm upward
+    //Returning to Analysis lab
 
-claw(1024, 0); //Closes Claw
+    turnL(90);
 
-set_servo_position(1, 1800); //Lifts arm by a bit in order to move BotGal without knocking over towers
+    drive(500);
 
+    create_stop();
 
-turnL(180);
+    basePos = base(basePos, 0); //faces crane towards analysis lab
 
-drive(600);
+    armPos = arm(armPos, 1024); //lowers cubes
 
-//Drops arm and opens claw
+    
 
-armDrop(0, 1600, 500);
+	disable_servos();
 
-claw(0, 1024);
+	camera_close();
 
+	create_disconnect();
 
-disable_servos();
-
-camera_close();
-
-create_disconnect();
-
-return(0);
+	return(0);
 
 }
 
 
-void drive(int distance)
+void drive(int dist)
 
 {
 
-set_create_distance(0);
+	set_create_distance(0);
 
-if( distance > 0)
+	if( dist > 0)
 
-{
+	{
 
-while (get_create_distance() <= distance)
+		while (get_create_distance() < dist)
 
-{
+        {
 
-create_drive_direct(SPEEDL, SPEEDR);
+			create_drive_direct(SPEEDL, SPEEDR);
+
+        }
+
+	}
+
+	else if(dist < 0)
+
+	{
+
+		while (get_create_distance() > dist)
+
+		{
+
+			create_drive_direct(-SPEEDL, -SPEEDR);
+
+		}
+
+	}
+
+    else
+
+	create_stop();
 
 }
 
-}
 
-else
-
-{
-
-while (get_create_distance() >= distance)
-
-{
-
-create_drive_direct((-1 * SPEEDL), (-1 * SPEEDR));
-
-}
-
-}
-
-create_stop();
-
-}
-
-
-void turnR(int degree)
+void turnR (int deg)
 
 {
 
     set_create_total_angle(0);
 
-    while (get_create_total_angle() >= -degree)
+    
+
+    while (get_create_total_angle() > -deg)
 
     {
 
@@ -252,13 +258,13 @@ void turnR(int degree)
 }
 
 
-void turnL (int degree)
+void turnL (int deg)
 
 {
 
     set_create_total_angle(0);
 
-    while (get_create_total_angle() < degree)
+    while (get_create_total_angle() < deg)
 
     {
 
@@ -273,57 +279,54 @@ void turnL (int degree)
 
 void camera()
 
-{
+{   
 
-    
+	int stop = 0;
 
-int stop = 0;
+	while (stop == 0)
 
+	{	
 
-while (stop == 0)
+		camera_update();
 
-{
-
-	camera_update();
-
-	if (get_object_count(0) > 0) //If seeing BotGal
-
-	{
-
-		int x = get_object_center_x(0, 0);
-
-        
-
-		if (x < 75)
+		if (get_object_count(0) > 0) //If seeing BotGal
 
 		{
 
-			//when the center of the object is to the left of bot turns left
+			int x = get_object_center_x(0, 0);
 
-			turnL(25);
+			if (x < 75)
 
-		}
+			{
 
-		else if (x > 85)
+				//when the center of the object is to the left of bot turns left
 
-		{
+				turnL(25);
 
-		//when the center of the object is to the right of bot turns right
+			}
 
-		turnR(25);
+			else if (x > 85)
 
-		}
+			{
+
+				//when the center of the object is to the right of bot turns right
+
+				turnR(25);
+
+			}
 
 
-		else
+			else
 
-		{
+			{
 
-		//stops the loop when object is in center of bot
+			//stops the loop when object is in center of bot
 
-		stop = 1;
+			stop = 1;
 
-		ao();
+			ao();
+
+			}
 
 		}
 
@@ -331,183 +334,111 @@ while (stop == 0)
 
 }
 
-}
 
-
-void claw (int fromPosC, int toPosC)
+int base(int fromPosB, int toPosB)
 
 {
 
-enable_servos(); 
+    enable_servos();
 
-   	int position = 0; 
-
-
-    	if (fromPosC < toPosC)
-
-    	{
-
-        		for (position = fromPosC; position <= toPosC; position++)
-
-        		{
-
-            		set_servo_position(0, position); 
-
-            		msleep(1);
-
-}
-
-}
-
-
-else 
-
-    	{
-
-        		for (position = fromPosC; position >=  toPosC; position--)
-
-        		{
-
-            		set_servo_position(0, position); 
-
-            		msleep(1);
-
-    		}
-
-}
-
-}
-
-
-void armRaise (int fromPosArm0, int fromPosArm1, int finalPos)
-
-{
-
-	int arm0, arm1, arm1F, topArm, bothArm;
-
-    //Arm0 is horizontal at 1024 
-
-    //Arm1 is horizontal at 0 
-
-    arm0 = fromPosArm0;
-
-    arm1 = fromPosArm1;    
-
-	arm1F = finalPos - 1024;
+    int current;
 
     
 
-	//Raises both arms to 1024
+    if (fromPosB < toPosB)
 
-	for(bothArm = 0; bothArm <= 1024; bothArm++)
+    {
+
+	for(current = fromPosB; current < toPosB; current++)
 
 	{
 
-		set_servo_position(0, arm0--);
-
-		set_servo_position(1, arm1++);
+        set_servo_position(1, current);
 
 		msleep(SPEEDA);
 
 	}
 
-            
+    }
 
-	//Raises/Lowers top arm depending on final arm value 
+    else
 
-	if (arm1F > 0)
+    {
 
-	{
+        for(current = fromPosB; current > toPosB; current--)
 
-		for(topArm = 0; topArm <= arm1F; topArm++)
+        {
 
-		{
+         set_servo_position(1, current);
 
-			set_servo_position(1, arm1++);
-
-			msleep(1);
-
-		}
-
-   	}
-
-	else if (arm1F < 0)
-
-	{ 
-
-		for(topArm = arm1F; topArm >= 0; topArm--)
-
-		{
-
-			set_servo_position(1, arm1--);
-
-			msleep(1);
-
-        }
-
-	}
-
-}
-
-
-void armDrop (int fromPosArm0, int fromPosArm1, int finalPos)
-
-{	
-
-	int arm0, arm1, arm1F, topArm, bothArm;
-
-    arm0 = fromPosArm0;
-
-    arm1 = fromPosArm1; 
-
-	arm1F = finalPos - 1024;
-
-    
-
-	if(arm1F > 0)
-
-	{
-
-		for(topArm = arm1F; topArm >= 0; topArm--)
-
-    	{
-
-        	set_servo_position(1, arm1--);
-
-           	msleep(SPEEDA);
-
-		}
-
-	}    
-
-	else if (arm1F < 0)
-
-	{
-
-		arm1F += 1024; //finds value in which arm1 needs to reach 1024
-
-		for(topArm = 0; topArm < arm1F; topArm++)
-
-    	{
-
-        	set_servo_position(1, arm1++);
-
-           	msleep(SPEEDA);
+         msleep(SPEEDA);
 
         }
 
     }
 
-    for(bothArm = 0; bothArm <= 1024; bothArm++)
+    
+
+    return current;
+
+
+}
+
+
+void clawOpen()
+
+{
+
+	enable_servos(); 
+
+   	int position;
+
+    for (position = CLAWC; position < CLAWO; position++)
 
     {
 
-		set_servo_position(0, arm0++);
-
-        set_servo_position(1, arm1--);
+        set_servo_position(3, position); 
 
         msleep(SPEEDA);
 
     }
 
-} 
+}
+
+
+void clawClosed()
+
+{
+
+    enable_servos(); 
+
+   	int position;
+
+    for (position = CLAWO; position > CLAWC; position--)
+
+    {
+
+        set_servo_position(3, position); 
+
+        msleep(1);
+
+    }
+
+}
+
+
+int arm(int fromPosA, int toPosA)
+
+{
+
+	enable_servos();
+
+    int current;
+
+    if(fromPosA < toPosA)
+
+    {
+
+		for(current = fromPosA; current < toPosA; current++)
+    }
+}
