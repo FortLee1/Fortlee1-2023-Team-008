@@ -1,6 +1,7 @@
 #include <kipr/wombat.h>
 
 
+
 int arm(int fromPosA, int toPosA); //longer arm 
 
 void clawOpen();
@@ -20,15 +21,17 @@ void turnL (int deg);
 void camera();
 
 
+
 const int SPEEDR = 190; //Max is 500mm/second 
 
 const int SPEEDL = 190;
 
-const int SPEEDA = 2; //Arm speed
+const int SPEEDA = 1; //Arm speed
 
 const int CLAWO = 1110;
 
-const int CLAWC = 440;
+const int CLAWC = 200;
+
 
 
 int main()
@@ -51,13 +54,13 @@ int main()
 
 	//Initialize servo positions    
 
-    int basePos = 1024, armPos = 1024;
+    int basePos = 1024, armPos = 1200;
 
 	set_servo_position(1, basePos); //base
 
-	set_servo_position(2, armPos); //longer arm
+	set_servo_position(3, armPos); //longer arm
 
-	set_servo_position(3, CLAWO); //claw
+	set_servo_position(2, CLAWO); //claw
 
     
 
@@ -69,11 +72,11 @@ int main()
 
 	turnR(47);
 
-	drive(1050);
+	drive(1100);
 
 	turnR(43);
 
-	drive(100);
+	drive(40);
 
     create_stop();
 
@@ -85,7 +88,7 @@ int main()
 
     basePos = base(basePos, 0); //turns crane towards tower
 
-    armPos = arm(armPos, 1750); //Lowers arm onto botgal
+    armPos = arm(armPos, 1800); //Lowers arm onto botgal
 
     clawClosed();    
 
@@ -93,7 +96,7 @@ int main()
 
     basePos = base(basePos, 2047); //resets crane position
 
-    armPos = arm(armPos, 1024); //Lowers arm for safer transport
+    armPos = arm(armPos, 1300); //Lowers arm for safer transport
 
    
 
@@ -115,9 +118,11 @@ int main()
 
     //Drive towards tower one 
 
-    drive(-500);
+    turnL(190);
 
-    turnR(90);
+    drive(400);
+
+    turnL(100);
 
     drive(200);
 
@@ -129,7 +134,7 @@ int main()
 
     basePos = base(basePos, 2047); //turns crane towards tower
 
-    armPos = arm(armPos, 1500); //Lowers arm onto botgal
+    armPos = arm(armPos, 1600); //Lowers arm onto botgal
 
     clawClosed();    
 
@@ -145,7 +150,7 @@ int main()
 
     //Goal is to stack block one on block two and transport both 
 
-    drive(200);
+    drive(250);
 
     create_stop();
 
@@ -196,6 +201,7 @@ int main()
 }
 
 
+
 void drive(int dist)
 
 {
@@ -237,6 +243,7 @@ void drive(int dist)
 }
 
 
+
 void turnR (int deg)
 
 {
@@ -258,6 +265,7 @@ void turnR (int deg)
 }
 
 
+
 void turnL (int deg)
 
 {
@@ -275,6 +283,7 @@ void turnL (int deg)
     create_stop();
 
 }
+
 
 
 void camera()
@@ -316,6 +325,7 @@ void camera()
 			}
 
 
+
 			else
 
 			{
@@ -333,6 +343,7 @@ void camera()
 	}
 
 }
+
 
 
 int base(int fromPosB, int toPosB)
@@ -382,7 +393,9 @@ int base(int fromPosB, int toPosB)
     return current;
 
 
+
 }
+
 
 
 void clawOpen()
@@ -397,7 +410,7 @@ void clawOpen()
 
     {
 
-        set_servo_position(3, position); 
+        set_servo_position(2, position); 
 
         msleep(SPEEDA);
 
@@ -405,40 +418,3 @@ void clawOpen()
 
 }
 
-
-void clawClosed()
-
-{
-
-    enable_servos(); 
-
-   	int position;
-
-    for (position = CLAWO; position > CLAWC; position--)
-
-    {
-
-        set_servo_position(3, position); 
-
-        msleep(1);
-
-    }
-
-}
-
-
-int arm(int fromPosA, int toPosA)
-
-{
-
-	enable_servos();
-
-    int current;
-
-    if(fromPosA < toPosA)
-
-    {
-
-		for(current = fromPosA; current < toPosA; current++)
-    }
-}
